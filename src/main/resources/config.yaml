@@ -1,0 +1,17 @@
+# Global Configuration #
+
+sfdc:
+  username: "<username>"
+  password: "<password>"
+  token: "<token>"
+  
+http.port: "8081"
+
+step:
+  host: "nextgen-iotdev.scloud.stibo.com"
+  port: "443"
+  username: "<user>"
+  password: "<user>"
+  protocol: "HTTPS"
+  basePath: "/restapiv2/"
+    

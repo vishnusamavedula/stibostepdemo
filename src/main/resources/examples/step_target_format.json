@@ -1,0 +1,34 @@
+{
+  "name": "Account Name Sample Mule10",
+  "objectType": "Entity_Account",
+  "parent": "Mulesoft_Atlanta",
+  "values": {
+    "AccountPhone": {
+      "calculated": false,
+      "contextLocal": true,
+      "value": {
+        "value": "999-999-1999",
+        "valueId": null,
+        "unit": null
+      }
+    },
+    "AccountAddress": {
+      "calculated": false,
+      "contextLocal": true,
+      "value": {
+        "value": "1st Street 500, San Francisco 94105",
+        "valueId": null,
+        "unit": null
+      }
+   },
+   "AccountName": {
+      "calculated": false,
+      "contextLocal": true,
+      "value": {
+        "value": "Anypoint_test",
+        "valueId": null,
+        "unit": null
+      }
+    }
+  }
+}

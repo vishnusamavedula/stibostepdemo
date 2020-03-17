@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:cassandra-db="http://www.mulesoft.org/schema/mule/cassandra-db" xmlns:steprestapiv2="http://www.mulesoft.org/schema/mule/steprestapiv2"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/steprestapiv2 http://www.mulesoft.org/schema/mule/steprestapiv2/current/mule-steprestapiv2.xsd
+http://www.mulesoft.org/schema/mule/cassandra-db http://www.mulesoft.org/schema/mule/cassandra-db/current/mule-cassandra-db.xsd">
+	<flow name="salesforceAccountList" doc:id="2d0573a1-f421-440e-84bc-7d0bc98761b9" >
+		<http:listener doc:name="Listener" doc:id="5e634ae0-72ef-4252-a8c1-b7fb0a5fb6a0" config-ref="HTTP_Listener_config" path="/test"/>
+		<salesforce:query doc:name="Account List" doc:id="499e2931-94a7-45dc-a7bc-97b5f2257754" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query >select name from Account</salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="64dc105e-2962-466b-a598-6f149791f7a1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="accountToMdm" doc:id="ea204f03-bdeb-4643-be8d-86faefaad20b" initialState="started">
+		<salesforce:new-object objectType="Account" doc:name="On New Object" doc:id="e65a7103-33d2-41d7-bb65-e6ccdeb06e18" config-ref="Salesforce_Config">
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="SECONDS" />
+			</scheduling-strategy>
+		</salesforce:new-object>
+		<ee:transform doc:name="Transform Account Payload for P-MDM" doc:id="aa4063ff-50e5-40b6-83d2-04aa6b9c5aa2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name: "Parent Account Name - " ++ (payload.Name default ""),
+	objectType: "Entity_Account",
+	parent: "Mulesoft_Atlanta",
+	values: {
+		AccountPhone: {
+			calculated: "false",
+			contextLocal: "true",
+			value: {
+				value: payload.Phone default "",
+				valueId: null,
+				unit: null
+			}
+		},
+		AccountAddress: {
+			calculated: "false",
+			contextLocal: "true",
+			value: {
+				value: (((payload.BillingStreet default "") ++ " " ++ (payload.BillingCity default "")) ++ " " ++ (payload.BillingState default "")) ++ " " ++ (payload.BillingPostalCode default ""),
+				valueId: null,
+				unit: null
+			}
+		},
+		AccountName: {
+			calculated: "false",
+			contextLocal: "true",
+			value: {
+				value: payload.Name default "",
+				valueId: null,
+				unit: null
+			}
+		}
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="postBody" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name: "Parent Account Name - " ++ (payload.Name default ""),
+	objectType: "Entity_Account",
+	parent: "Mulesoft_Atlanta",
+	values: {
+		AccountPhone: {
+			calculated: "false",
+			contextLocal: "true",
+			value: {
+				value: payload.Phone default "",
+				valueId: null,
+				unit: null
+			}
+		},
+		AccountAddress: {
+			calculated: "false",
+			contextLocal: "true",
+			value: {
+				value: (((payload.BillingStreet default "") ++ " " ++ (payload.BillingCity default "")) ++ " " ++ (payload.BillingState default "")) ++ " " ++ (payload.BillingPostalCode default ""),
+				valueId: null,
+				unit: null
+			}
+		},
+		AccountName: {
+			calculated: "false",
+			contextLocal: "true",
+			value: {
+				value: payload.Name default "",
+				valueId: null,
+				unit: null
+			}
+		}
+	}
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<steprestapiv2:create-entity doc:name="Create entity" doc:id="b4a0b766-dcad-4615-b185-71386678121d" config-ref="STEP_REST_API_V2_Config" context="GL">
+			<steprestapiv2:create-entity-request-data ><![CDATA[#[output application/json --- vars.postBody]]]></steprestapiv2:create-entity-request-data>
+		</steprestapiv2:create-entity>
+		<logger level="INFO" doc:name="Logging Response" doc:id="4f58ae21-6373-4d0d-8178-aa12a4c35cf2" message="The new account is : #[payload]"/>
+	</flow>
+</mule>

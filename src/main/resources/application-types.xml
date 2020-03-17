@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="step_json" format="json">
+      <types:shape format="weave" example="examples/step_target_format.json"><![CDATA[%dw 2.0
+type step_json = {|
+  name: String, 
+  objectType: String, 
+  parent: String, 
+  values: {|
+    AccountPhone: {|
+      calculated: Boolean, 
+      contextLocal: Boolean, 
+      value: {|
+        value: String, 
+        valueId: Null, 
+        unit: Null
+      |}
+    |}, 
+    AccountAddress: {|
+      calculated: Boolean, 
+      contextLocal: Boolean, 
+      value: {|
+        value: String, 
+        valueId: Null, 
+        unit: Null
+      |}
+    |}, 
+    AccountName: {|
+      calculated: Boolean, 
+      contextLocal: Boolean, 
+      value: {|
+        value: String, 
+        valueId: Null, 
+        unit: Null
+      |}
+    |}
+  |}
+|} {"MetadataFormat": "json",
+"example": "{\"name\":\"Account Name Sample Mule10\",\"objectType\":\"Entity_Account\",\"parent\":\"Mulesoft_Atlanta\",\"values\":{\"AccountPhone\":{\"calculated\":false,\"contextLocal\":true,\"value\":{\"value\":\"999-999-1999\",\"valueId\":null,\"unit\":null}},\"AccountAddress\":{\"calculated\":false,\"contextLocal\":true,\"value\":{\"value\":\"1st Street 500, San Francisco 94105\",\"valueId\":null,\"unit\":null}},\"AccountName\":{\"calculated\":false,\"contextLocal\":true,\"value\":{\"value\":\"Anypoint_test\",\"valueId\":null,\"unit\":null}}}}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#aa4063ff-50e5-40b6-83d2-04aa6b9c5aa2">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="step_json"/>
+        </types:message>
+        <types:variables>
+          <types:variable name="postBody" type="step_json"/>
+        </types:variables>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
